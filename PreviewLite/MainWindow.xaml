@@ -6,6 +6,53 @@
         xmlns:local="clr-namespace:PreviewLite"
         mc:Ignorable="d"
         Title="MainWindow" Height="600" Width="800">
+
+    <Window.Resources>
+        <BitmapImage x:Key="Arrow" UriSource="left.png" />
+        <BitmapImage x:Key="Arrow_Highlight" UriSource="left_invert.png" />
+
+        <Style x:Key="Pushed" TargetType="{x:Type Button}">
+            <Style.Resources>
+                <DataTemplate x:Key="MouseOver">
+                    <Image Stretch="None" Source="{StaticResource Arrow_Highlight}"/>
+                </DataTemplate>
+                <DataTemplate x:Key="MouseNotOver">
+                    <Image Stretch="None" Source="{StaticResource Arrow}"/>
+                </DataTemplate>
+            </Style.Resources>
+
+            <Setter Property="OverridesDefaultStyle" Value="True" />
+            <Setter Property="RenderTransformOrigin" Value="0.5, 0.5"/>
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Name="border" BorderThickness="0" BorderBrush="Black" Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.9" ScaleY="0.9"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="ContentTemplate" Value="{StaticResource MouseNotOver}" />
+                                <Setter Property="Opacity" Value="0.7" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="False">
+                                <Setter Property="ContentTemplate" Value="{StaticResource MouseNotOver}" />
+                                <Setter Property="Opacity" Value="1.0" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -13,7 +60,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition />
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <Menu Grid.Row="0">
@@ -24,33 +71,43 @@
                 <Separator />
                 <MenuItem Header="_Exit" Click="Exit_Click" />
             </MenuItem>
+            <MenuItem Header="_Help" >
+                <MenuItem Header="_About" Click="About_Click" />
+            </MenuItem>
         </Menu>
 
-        <Image x:Name="preview_image" Grid.Row="1" Stretch="Uniform" />
+        <Image x:Name="preview_image" Grid.Row="1" Stretch="Uniform" Margin="10" OpacityMask="#FFF1F0F0" />
 
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="2" Background="#f5f5f5">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <Button Grid.Row="0" Grid.Column="0"  HorizontalAlignment="Right"  Click="Left_Click">
-                <Button.Template>
-                    <ControlTemplate>
-                        <Image x:Name="left_arrow" Stretch="None"  Source="left.png" />
-                    </ControlTemplate>
-                </Button.Template>
-            </Button>
-            <Button Grid.Row="0" Grid.Column="1"  HorizontalAlignment="Left" Click="Right_Click">
-                <Button.Template>
-                    <ControlTemplate>
-                        <Image x:Name="right_arrow" Stretch="None" Source="right.png" />
-                    </ControlTemplate>
-                </Button.Template>
-            </Button>
+            <Grid Margin="0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Button Name="left_arrow" Grid.Row="0" Grid.Column="0"  HorizontalAlignment="Right" Click="Left_Click" Margin="0,0,10,0" Style="{StaticResource Pushed}" />
+                <StackPanel Grid.Row="0" Grid.Column="1" RenderTransformOrigin="0.5,0.5">
+                    <StackPanel.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleY="1" ScaleX="-1"/>
+                            <SkewTransform AngleY="0" AngleX="0"/>
+                            <RotateTransform Angle="0"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </StackPanel.RenderTransform>
+                    <Button Name="right_arrow" HorizontalAlignment="Right" Click="Right_Click" Margin="0,0,10,0" Style="{StaticResource Pushed}" RenderTransformOrigin="0.5,0.5" />
+                </StackPanel>
+            </Grid>    
         </Grid>
-        
+
     </Grid>
 </Window>

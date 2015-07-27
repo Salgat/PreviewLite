@@ -49,7 +49,7 @@ namespace PreviewLite
                     this.Title = image_location;
 
                     // Find all images in directory
-                    string[] extensions = new[] { ".jpg", ".bmp", ".png" };
+                    string[] extensions = new[] { ".jpg", ".jpeg", ".bmp", ".png" };
                     //DirectoryInfo directory = new DirectoryInfo(image_location);
                     //directory = new DirectoryInfo(@"C:\Users\Austin\Downloads");
                     directory = new DirectoryInfo(System.IO.Path.GetDirectoryName(image_location));
@@ -59,8 +59,10 @@ namespace PreviewLite
                     image_index = 0;
                     for (int index = 0; index < image_files.Length; ++index)
                     {
-                        if (image_files[index].ToString() == image_location)
+                        Console.WriteLine("Testing comparison of image_location to image_file[]: " + System.IO.Path.GetFileName(image_location) + ", " + image_files[index].ToString());
+                        if (image_files[index].ToString() == System.IO.Path.GetFileName(image_location))
                         {
+                            Console.WriteLine("Found index at: " + image_index.ToString());
                             image_index = index;
                             break;
                         }
@@ -160,8 +162,22 @@ namespace PreviewLite
             {
                 // Save document 
                 string filename = dialogue.FileName;
+                string image_location = directory.ToString() + "\\" + image_files[image_index].ToString();
                 
+                try
+                {
+                    File.Copy(image_location, filename, false);
+                }
+                catch (IOException copyError)
+                {
+                    MessageBox.Show("Error: Image copy failed (does file still exist?)");
+                }
             }
+        }
+
+        private void About_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Created By Austin Salgat");
         }
     }
 }
