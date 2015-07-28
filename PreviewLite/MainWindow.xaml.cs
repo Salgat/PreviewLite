@@ -31,6 +31,11 @@ namespace PreviewLite
             InitializeComponent();
         }
 
+        public MainWindow(string image_location) : this()
+        {
+            DisplayNewImage(image_location);
+        }
+
         /// <summary>
         /// Using Windows Open File dialogue, selects an image to display
         /// </summary>
@@ -41,37 +46,7 @@ namespace PreviewLite
             OpenFileDialog openFileDialog = new OpenFileDialog();
             if (openFileDialog.ShowDialog() == true)
             {
-                try
-                {
-                    // Load image
-                    string image_location = openFileDialog.FileName;
-                    preview_image.Source = new BitmapImage(new Uri(image_location));
-                    this.Title = image_location;
-
-                    // Find all images in directory
-                    string[] extensions = new[] { ".jpg", ".jpeg", ".bmp", ".png" };
-                    //DirectoryInfo directory = new DirectoryInfo(image_location);
-                    //directory = new DirectoryInfo(@"C:\Users\Austin\Downloads");
-                    directory = new DirectoryInfo(System.IO.Path.GetDirectoryName(image_location));
-                    image_files = directory.EnumerateFiles().Where(f => extensions.Contains(f.Extension.ToLower())).ToArray();
-
-                    // Find current position in directory
-                    image_index = 0;
-                    for (int index = 0; index < image_files.Length; ++index)
-                    {
-                        Console.WriteLine("Testing comparison of image_location to image_file[]: " + System.IO.Path.GetFileName(image_location) + ", " + image_files[index].ToString());
-                        if (image_files[index].ToString() == System.IO.Path.GetFileName(image_location))
-                        {
-                            Console.WriteLine("Found index at: " + image_index.ToString());
-                            image_index = index;
-                            break;
-                        }
-                    }
-                }
-                catch (System.NotSupportedException exception)
-                {
-                    MessageBox.Show("File type not supported.", "Error");
-                }
+                DisplayNewImage(openFileDialog.FileName);
             }
         }
 
@@ -96,6 +71,10 @@ namespace PreviewLite
             Left
         };
 
+        /// <summary>
+        /// Changes currently shown image to the next or previous image in the same directory
+        /// </summary>
+        /// <param name="direction">Determines whether to show the next (NavigationType.Right) or previous image (NavigationType.Left)</param>
         private void NavigateImages(NavigationType direction)
         {
             if (image_files == null) return;
@@ -123,27 +102,47 @@ namespace PreviewLite
                 }
             }
 
-            //string image_location = @"C:\Users\Austin\Downloads\" + image_files[image_index].ToString();
             string image_location = directory.ToString() + "\\" + image_files[image_index].ToString();
-            DisplayImage(image_location);
-        }
-
-        private void DisplayImage(string image_location)
-        {
-            try
-            {
-                preview_image.Source = new BitmapImage(new Uri(image_location));
-            }
-            catch (Exception exception)
-            {
-                preview_image.Source = new BitmapImage(new Uri(@"load_failed.png", UriKind.Relative));
-            }
-
-            this.Title = image_location;
+            DisplayNewImage(image_location);
         }
 
         /// <summary>
-        /// Saves currently shown image to location
+        /// Displays an image and updates directory information
+        /// </summary>
+        /// <param name="image_location">The absolute position of the image file location</param>
+        private void DisplayNewImage(string image_location)
+        {
+            try
+            {
+                // Find all images in directory
+                string[] extensions = new[] { ".jpg", ".jpeg", ".bmp", ".png" };
+                directory = new DirectoryInfo(System.IO.Path.GetDirectoryName(image_location));
+                image_files = directory.EnumerateFiles().Where(f => extensions.Contains(f.Extension.ToLower())).ToArray();
+
+                // Find current position in directory
+                image_index = 0;
+                for (int index = 0; index < image_files.Length; ++index)
+                {
+                    if (image_files[index].ToString() == System.IO.Path.GetFileName(image_location))
+                    {
+                        image_index = index;
+                        break;
+                    }
+                }
+
+                // Load image
+                this.Title = image_location;
+                preview_image.Source = new BitmapImage(new Uri(image_location));
+            }
+            catch (System.NotSupportedException)
+            {
+                MessageBox.Show("File type not supported.", "Error");
+                preview_image.Source = new BitmapImage(new Uri(@"load_failed.png", UriKind.Relative));
+            }
+        }
+
+        /// <summary>
+        /// Saves currently shown image to location (using File.Copy)
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -168,7 +167,7 @@ namespace PreviewLite
                 {
                     File.Copy(image_location, filename, false);
                 }
-                catch (IOException copyError)
+                catch (IOException)
                 {
                     MessageBox.Show("Error: Image copy failed (does file still exist?)");
                 }
