@@ -25,6 +25,7 @@ namespace PreviewLite
         private DirectoryInfo directory;
         private FileInfo[] image_files;
         private int image_index = 0;
+        private BitmapImage current_image;
 
         public MainWindow()
         {
@@ -115,7 +116,7 @@ namespace PreviewLite
             try
             {
                 // Find all images in directory
-                string[] extensions = new[] { ".jpg", ".jpeg", ".bmp", ".png" };
+                string[] extensions = new[] { ".jpg", ".jpeg", ".bmp", ".png", ".gif" };
                 directory = new DirectoryInfo(System.IO.Path.GetDirectoryName(image_location));
                 image_files = directory.EnumerateFiles().Where(f => extensions.Contains(f.Extension.ToLower())).ToArray();
 
@@ -132,7 +133,8 @@ namespace PreviewLite
 
                 // Load image
                 this.Title = image_location;
-                preview_image.Source = new BitmapImage(new Uri(image_location));
+                BitmapImage current_image = new BitmapImage(new Uri(image_location));
+                preview_image.Source = current_image;
             }
             catch (System.NotSupportedException)
             {
@@ -176,7 +178,7 @@ namespace PreviewLite
 
         private void About_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Created By Austin Salgat");
+            MessageBox.Show("Created by Austin Salgat");
         }
     }
 }
